@@ -1,0 +1,44 @@
+cafeteria.js
+db.cafeteria.insertOne({ tipo: 'filtrado', ingredientes: ['vainilla', 'canela', 'chocolate', 'caramelo'], peso: 250, intensidad: 'media', precio: [{tipo: 'efectivo', precio: 500}], leche: true, tostador: [{localidad: 'San Nicolas', nombre: 'Leandro', cuit: 14123456}]})
+db.cafeteria.insertOne({ tipo: 'espresso', ingredientes: ['vainilla', 'chocolate'], peso: 200, intensidad: 'alta', precio: [{tipo: 'tarjeta', precio: 600}], leche: false, tostador: [{localidad: 'San Justo', nombre: 'Nicolas', cuit: 96258741}]})
+db.cafeteria.insertOne({ tipo: 'cold brew', ingredientes: ['vainilla', 'caramelo'], peso: 210, intensidad: 'baja', precio: [{tipo: 'efectivo', precio: 700}], leche: false, tostador: [{localidad: 'San Nicolas', nombre: 'Leandro', cuit: 14123456}]})
+db.cafeteria.insertOne({ tipo: 'descafeinado', ingredientes: ['canela', 'chocolate'], peso: 215, intensidad: 'media', precio: [{tipo: 'tarjeta', precio: 650}], leche: true, tostador: [{localidad: 'Necochea', nombre: 'Gabriel', cuit: 36741258}]})
+db.cafeteria.insertOne({ tipo: 'cold brew', ingredientes: ['caramelo'], peso: 225, intensidad: 'baja', precio: [{tipo: 'efectivo', precio: 700}], leche: true, tostador: [{localidad: 'San Justo', nombre: 'Nicolas', cuit: 96258741}]})
+db.cafeteria.insertOne({ tipo: 'espresso', ingredientes: ['chocolate'], peso: 250, intensidad: 'media', precio: [{tipo: 'tarjeta', precio: 650}], leche: false, tostador: [{localidad: 'San Nicolas', nombre: 'Leandro', cuit: 14123456}]})
+db.cafeteria.insertOne({ tipo: 'descafeinado', ingredientes: ['vainilla'], peso: 215, intensidad: 'media', precio: [{tipo: 'tarjeta', precio: 600}], leche: true, tostador: [{localidad: 'Buenos Aires', nombre: 'Jose', cuit: 85123654}]})
+db.cafeteria.insertOne({ tipo: 'filtrado', ingredientes: ['caramelo'], peso: 225, intensidad: 'media', precio: [{tipo: 'efectivo', precio: 750}], leche: false, tostador: [{localidad: 'San Cristobal', nombre: 'Tomas', cuit: 78369123}]})
+db.cafeteria.insertOne({ tipo: 'cold brew', ingredientes: ['canela'], peso: 215, intensidad: 'baja', precio: [{tipo: 'tarjeta', precio: 700}], leche: true, tostador: [{localidad: 'San Nicolas', nombre: 'Leandro', cuit: 14123456}]})
+db.cafeteria.insertOne({ tipo: 'descafeinado', ingredientes: ['vainilla', 'canela', 'chocolate', 'caramelo'], peso: 300, intensidad: 'alta', precio: [{tipo: 'efectivo', precio: 760}], leche: true, tostador: [{localidad: 'Necochea', nombre: 'Gabriel', cuit: 36741258}]})
+
+1) Crear el script .js con la creación de la base de datos y las colecciones.
+use cafeteria
+load('cafeteria.js')
+
+2) Buscar cuántos cafés contienen chocolate entre sus ingredientes.
+db.cafeteria.countDocuments({ ingredientes: { $in: ['chocolate'] } });
+
+3) Buscar cuántos cafés son de tipo “cold brew”· y contienen “vainilla” entre sus ingredientes.
+db.cafeteria.countDocuments({ tipo: 'cold brew', ingredientes: { $in: ['vainilla'] } });
+
+4) Listar tipo y peso de los cafés que tienen una intensidad “media”.
+db.cafeteria.find( { intensidad: 'media' }, { _id: 0, tipo: 1, peso: 1 } );
+
+5) Obtener tipo, peso e intensidad de los cafés cuyo peso se encuentre entre 200 y 260 inclusive.
+db.cafeteria.find( { peso: {$gte: 200, $lte: 260 } }, { _id: 0, tipo: 1, peso: 1, intensidad: 1 });
+
+6) Mostrar los cafés que fueron tostados en localidades que contengan “san”, permitiendo buscar por “san”
+y que se muestren también los de “santos”, “san justo”, etc. Ordenar el resultado por peso de manera
+descendente.
+db.cafeteria.find( { 'tostador.localidad': { $regex: 'san', $options: 'i' }}, { _id: 0, tipo: 1, peso: 1, 'tostador.localidad': 1}).sort({ peso: -1 });
+
+7) Mostrar la sumar del peso de cada tipo de Café.
+db.cafeteria.aggregate([ { $group: { _id: '$tipo', pesoTotal: { $sum: '$peso' }}}]);
+
+8) Agregar el ingrediente “whisky” todos los cafés cuya intensidad es alta.
+db.cafeteria.updateMany( { intensidad: 'alta' }, { $addToSet: { ingredientes: 'whisky' }});
+
+9) Sumarle 10 al peso de los cafés cuyo peso se encuentre entre 200 y 260 inclusive.
+db.cafeteria.updateMany( { peso: { $gte: 200, $lte: 260 } }, { $inc: { peso: 10 } });
+
+10) Eliminar los cafés cuyo peso sea menor o igual a 210.
+db.cafeteria.deleteMany( { peso: { $lte: 210 }});
